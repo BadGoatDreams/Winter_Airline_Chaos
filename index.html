@@ -12,6 +12,7 @@
             --liberty-gold: #d4af37;
             --train-blue: #004E7C;
             --taxi-yellow: #FFD700;
+            --security-navy: #0d1b2a;
             --bg-dark: #121212;
             --text-light: #e0e0e0;
         }
@@ -33,23 +34,23 @@
         /* Navigation Grid */
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             max-width: 1000px;
-            margin: 40px auto;
+            margin: 30px auto;
             padding: 20px;
         }
 
         .menu-btn {
-            padding: 25px;
-            font-size: 1.2rem;
+            padding: 20px;
+            font-size: 1.1rem;
             font-weight: bold;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             transition: transform 0.2s;
             color: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,6 +65,7 @@
         .btn-liberty { background: linear-gradient(135deg, var(--liberty-black), var(--liberty-gold)); }
         .btn-train { background: var(--train-blue); }
         .btn-taxi { background: var(--taxi-yellow); color: black; }
+        .btn-security { background: var(--security-navy); border: 2px solid #4a90e2; }
         .btn-traveler { background: #2e7d32; }
         .btn-back { margin: 20px; padding: 10px 20px; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
 
@@ -122,11 +124,31 @@
             margin-top: 10px;
         }
 
+        /* MOBILE HIDING LOGIC */
+        .mobile-warning { display: none; }
+        
+        @media only screen and (max-width: 768px) {
+            #board-content-wrapper { display: none; }
+            .mobile-warning { 
+                display: block; 
+                padding: 40px; 
+                border: 2px dashed #ff3333; 
+                margin: 20px; 
+                background: #1a0000;
+                color: #ff3333;
+                font-weight: bold;
+                font-size: 1.5rem;
+                animation: pulse 2s infinite;
+            }
+        }
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+
+
         /* TICKET DESIGN */
         .ticket {
             background: white;
             color: #333;
-            width: 100%;
+            width: 90%;
             max-width: 450px;
             margin: 20px auto;
             border-radius: 15px;
@@ -141,11 +163,11 @@
         .ticket-row { display: flex; justify-content: space-between; margin-bottom: 15px; }
         .ticket-label { font-size: 0.8rem; color: #777; text-transform: uppercase; }
         .ticket-value { font-size: 1.4rem; font-weight: bold; color: #000; }
-        .ticket-dest { font-size: 2.5rem; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 2px; }
+        .ticket-dest { font-size: 2.2rem; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 1px; word-wrap: break-word; }
         .barcode { height: 40px; background: repeating-linear-gradient(90deg, #333 0, #333 2px, transparent 2px, transparent 4px); margin-top: 15px; opacity: 0.7; }
 
         /* Role Card Design */
-        .role-card { background: white; color: black; padding: 25px; border-radius: 10px; text-align: left; max-width: 700px; margin: 0 auto; }
+        .role-card { background: white; color: black; padding: 25px; border-radius: 10px; text-align: left; max-width: 700px; margin: 0 auto; width: 90%; box-sizing: border-box; }
         .inventory { background: #eee; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 5px solid #333; }
 
     </style>
@@ -156,18 +178,27 @@
         <h1>🇺🇸 NYC Liberty Airport Hub</h1>
         <p>Select your station.</p>
         <div class="menu-grid">
-            <button class="menu-btn btn-board" onclick="showPage('board-page'); startBoardCycle();">🖥️ Main Board<span class="sub-text">Classroom View</span></button>
+            <button class="menu-btn btn-board" onclick="showPage('board-page'); startBoardCycle();">🖥️ Main Board<span class="sub-text">Projector Only</span></button>
             <button class="menu-btn btn-traveler" onclick="showPage('traveler-page')">🧳 Traveler<span class="sub-text">Get Your Ticket</span></button>
+            
             <button class="menu-btn btn-eagle" onclick="showPage('eagle-page')">🦅 Eagle Wings<span class="sub-text">Staff Only</span></button>
             <button class="menu-btn btn-liberty" onclick="showPage('liberty-page')">🗽 Liberty Jets<span class="sub-text">Staff Only</span></button>
             <button class="menu-btn btn-train" onclick="showPage('train-page')">🚆 Amtrak<span class="sub-text">Staff Only</span></button>
             <button class="menu-btn btn-taxi" onclick="showPage('taxi-page')">🚖 Taxi<span class="sub-text">Staff Only</span></button>
+            <button class="menu-btn btn-security" onclick="showPage('security-page')">👮‍♂️ Security<span class="sub-text">Staff Only</span></button>
         </div>
     </div>
 
     <div id="board-page" class="hidden">
         <h1 style="color:orange; font-family:'Courier New'; margin-bottom:5px;">DEPARTURES</h1>
-        <div class="board-container">
+        
+        <div class="mobile-warning">
+            🚫 NO PHONES 🚫<br><br>
+            Look at the Projector Screen!<br>
+            This information is hidden on mobile devices.
+        </div>
+
+        <div id="board-content-wrapper" class="board-container">
             <div class="board-header"><span>FLIGHT NO.</span><span class="col-dest">DESTINATION</span><span>STATUS</span></div>
             
             <div id="flight-display" class="flight-rows-container">
@@ -247,6 +278,24 @@
         <button class="btn-back" onclick="showPage('menu-page')">Back to Menu</button>
     </div>
 
+    <div id="security-page" class="hidden">
+        <div class="role-card" style="border-top: 10px solid var(--security-navy);">
+            <h2>👮‍♂️ Security Officer</h2>
+            <div class="inventory">
+                <p>🛡️ <b>Mission:</b> Enforce Polite English.</p>
+            </div>
+            <h3>Your Instructions:</h3>
+            <ul>
+                <li><b>Patrol the Lines:</b> Walk up and down the lines at the Airline Desks.</li>
+                <li><b>Listen for Rudeness:</b> If you hear "I want..." or "Give me..." blow your whistle (or clap hands).</li>
+                <li><b>The Penalty:</b> Make them go to the BACK of the line.</li>
+                <li><b>Correct Them:</b> Teach them to say "Could I please have..." or "I would like to..."</li>
+                <li><b>Check Tickets:</b> Before they sit down, check their ticket. Does the destination match the agency?</li>
+            </ul>
+        </div>
+        <button class="btn-back" onclick="showPage('menu-page')">Back to Menu</button>
+    </div>
+
     <div id="traveler-page" class="hidden">
         <h2>Passenger Portal</h2>
         <p>Click to retrieve your booked ticket.</p>
@@ -289,7 +338,7 @@
 
             <div style="background:#333; padding:15px; border-radius:10px; margin-top:20px; text-align:left;">
                 <p><b>💰 Your Wallet:</b> <span id="t-money" style="color:#4caf50; font-weight:bold;"></span></p>
-                <p><b>⚠️ Action Required:</b> Check the <b>Main Board</b> carefully! Wait for the page to flip. Is your flight cancelled?</p>
+                <p><b>⚠️ Action Required:</b> Check the <b>Main Board</b> (on the big screen). Is your flight cancelled? If so, find another way!</p>
             </div>
         </div>
         <button class="btn-back" onclick="showPage('menu-page')">Back to Menu</button>
@@ -360,7 +409,7 @@
                     renderBoard(boardPage1, 1);
                     currentPage = 1;
                 }
-            }, 8000); // 8 seconds per page (Slower read time)
+            }, 8000); // 8 seconds per page
         }
 
         function stopBoardCycle() {
