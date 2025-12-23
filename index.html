@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇺🇸 NYC Liberty Airport Hub</title>
+    <style>
+        :root {
+            --eagle-blue: #003366;
+            --eagle-red: #cc0000;
+            --liberty-black: #111;
+            --liberty-gold: #d4af37;
+            --train-blue: #004E7C;
+            --taxi-yellow: #FFD700;
+            --bg-dark: #121212;
+            --text-light: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        /* Helper Classes */
+        .hidden { display: none; }
+        .active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Navigation Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .menu-btn {
+            padding: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-btn:hover { transform: scale(1.03); }
+        .sub-text { font-size: 0.8rem; margin-top: 5px; font-weight: normal; opacity: 0.8; }
+
+        /* Colors */
+        .btn-board { background: #333; border: 2px solid #fff; }
+        .btn-eagle { background: linear-gradient(135deg, var(--eagle-blue), var(--eagle-red)); }
+        .btn-liberty { background: linear-gradient(135deg, var(--liberty-black), var(--liberty-gold)); }
+        .btn-train { background: var(--train-blue); }
+        .btn-taxi { background: var(--taxi-yellow); color: black; }
+        .btn-traveler { background: #2e7d32; }
+        .btn-back { margin: 20px; padding: 10px 20px; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+
+        /* DEPARTURE BOARD */
+        .board-container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: #000; 
+            padding: 20px; 
+            border: 8px solid #444; 
+            border-radius: 10px; 
+            min-height: 520px;
+        }
+        .board-header { 
+            display: flex; 
+            justify-content: space-between; 
+            color: #888; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            border-bottom: 1px solid #444; 
+            padding-bottom: 5px; 
+            font-size: 1rem; 
+        }
+        .flight-rows-container {
+            min-height: 320px;
+        }
+        .flight-row { 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 1px solid #222; 
+            padding: 12px 0; 
+            font-family: 'Courier New', monospace; 
+            font-size: 1.4rem; 
+            text-align: left; 
+            animation: flipIn 0.5s ease-out;
+        }
+        @keyframes flipIn {
+            0% { transform: rotateX(-90deg); opacity: 0; }
+            100% { transform: rotateX(0); opacity: 1; }
+        }
+
+        .flight-row span { flex: 1; }
+        .col-dest { flex: 1.5 !important; } 
+        
+        .st-cancel { color: #ff3333; font-weight: bold; text-shadow: 0 0 5px #ff3333; }
+        .st-open { color: #33ff33; font-weight: bold; }
+        .st-delay { color: orange; font-weight: bold; }
+        .st-taxi { color: yellow; font-weight: bold; animation: blink 1s infinite; }
+        
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        .page-indicator {
+            text-align: right;
+            color: #555;
+            font-family: 'Courier New', monospace;
+            margin-top: 10px;
+        }
+
+        /* TICKET DESIGN */
+        .ticket {
+            background: white;
+            color: #333;
+            width: 100%;
+            max-width: 450px;
+            margin: 20px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: left;
+            position: relative;
+        }
+        .ticket-header { background: var(--eagle-blue); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .ticket-header.liberty { background: var(--liberty-black); color: var(--liberty-gold); }
+        .ticket-body { padding: 20px; }
+        .ticket-row { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .ticket-label { font-size: 0.8rem; color: #777; text-transform: uppercase; }
+        .ticket-value { font-size: 1.4rem; font-weight: bold; color: #000; }
+        .ticket-dest { font-size: 2.5rem; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 2px; }
+        .barcode { height: 40px; background: repeating-linear-gradient(90deg, #333 0, #333 2px, transparent 2px, transparent 4px); margin-top: 15px; opacity: 0.7; }
+
+        /* Role Card Design */
+        .role-card { background: white; color: black; padding: 25px; border-radius: 10px; text-align: left; max-width: 700px; margin: 0 auto; }
+        .inventory { background: #eee; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 5px solid #333; }
+
+    </style>
+</head>
+<body>
+
+    <div id="menu-page" class="active">
+        <h1>🇺🇸 NYC Liberty Airport Hub</h1>
+        <p>Select your station.</p>
+        <div class="menu-grid">
+            <button class="menu-btn btn-board" onclick="showPage('board-page'); startBoardCycle();">🖥️ Main Board<span class="sub-text">Classroom View</span></button>
+            <button class="menu-btn btn-traveler" onclick="showPage('traveler-page')">🧳 Traveler<span class="sub-text">Get Your Ticket</span></button>
+            <button class="menu-btn btn-eagle" onclick="showPage('eagle-page')">🦅 Eagle Wings<span class="sub-text">Staff Only</span></button>
+            <button class="menu-btn btn-liberty" onclick="showPage('liberty-page')">🗽 Liberty Jets<span class="sub-text">Staff Only</span></button>
+            <button class="menu-btn btn-train" onclick="showPage('train-page')">🚆 Amtrak<span class="sub-text">Staff Only</span></button>
+            <button class="menu-btn btn-taxi" onclick="showPage('taxi-page')">🚖 Taxi<span class="sub-text">Staff Only</span></button>
+        </div>
+    </div>
+
+    <div id="board-page" class="hidden">
+        <h1 style="color:orange; font-family:'Courier New'; margin-bottom:5px;">DEPARTURES</h1>
+        <div class="board-container">
+            <div class="board-header"><span>FLIGHT NO.</span><span class="col-dest">DESTINATION</span><span>STATUS</span></div>
+            
+            <div id="flight-display" class="flight-rows-container">
+                </div>
+
+            <div class="page-indicator">PAGE <span id="page-num">1</span> OF 2</div>
+
+            <div style="border-top: 2px solid white; margin:15px 0 5px 0;"></div>
+            <div class="flight-row" style="font-size:1.1rem; color:#aaa;"><span>🚆 AMTRAK</span><span class="col-dest">BOSTON / DC / ATLANTA</span><span class="st-open">OPEN</span></div>
+        </div>
+        <button class="btn-back" onclick="stopBoardCycle(); showPage('menu-page')">Back to Menu</button>
+    </div>
+
+    <div id="eagle-page" class="hidden">
+        <div class="role-card" style="border-top: 10px solid var(--eagle-blue);">
+            <h2>🦅 Eagle Wings Agent</h2>
+            <div class="inventory">
+                <p>✅ <b>Flying to:</b> Chicago ($500).</p>
+                <p>❌ <b>Cancelled to:</b> Los Angeles, Washington DC, Boston, New Jersey.</p>
+            </div>
+            <h3>Instructions:</h3>
+            <ul>
+                <li><b>Los Angeles Passenger:</b> "We are cancelled. Go buy a ticket from <span style="color:blue">Liberty Jets</span>."</li>
+                <li><b>Chicago Passenger:</b> "We are flying! That will be $500."</li>
+                <li><b>Washington DC or Boston:</b> "We are cancelled. Liberty is cancelled too. You HAVE to take the <span style="color:green">Train</span>."</li>
+                <li><b>New Jersey:</b> "That is too close. Go to the Taxi Stand."</li>
+            </ul>
+        </div>
+        <button class="btn-back" onclick="showPage('menu-page')">Back to Menu</button>
+    </div>
+
+    <div id="liberty-page" class="hidden">
+        <div class="role-card" style="border-top: 10px solid var(--liberty-gold);">
+            <h2>🗽 Liberty Jets Agent</h2>
+            <div class="inventory">
+                <p>✅ <b>Flying to:</b> Los Angeles ($600).</p>
+                <p>❌ <b>Cancelled to:</b> Chicago, Washington DC, Boston, Brooklyn.</p>
+            </div>
+            <h3>Instructions:</h3>
+            <ul>
+                <li><b>Chicago Passenger:</b> "We are cancelled. Go buy a ticket from <span style="color:red">Eagle Wings</span>."</li>
+                <li><b>Los Angeles Passenger:</b> "We are flying! That will be $600."</li>
+                <li><b>Washington DC or Boston:</b> "Both airlines are grounded. You HAVE to take the <span style="color:green">Train</span>."</li>
+                <li><b>Brooklyn:</b> "We don't fly to Brooklyn! Go to the Taxi Stand."</li>
+            </ul>
+        </div>
+        <button class="btn-back" onclick="showPage('menu-page')">Back to Menu</button>
+    </div>
+
+    <div id="train-page" class="hidden">
+        <div class="role-card" style="border-top: 10px solid var(--train-blue);">
+            <h2>🚆 Amtrak Conductor</h2>
+            <div class="inventory">
+                <p>✅ <b>Destinations:</b> Boston ($80), Washington DC ($90), Atlanta ($120).</p>
+            </div>
+            <h3>Instructions:</h3>
+            <ul>
+                <li><b>DC/Boston Passengers:</b> "Welcome aboard! The airlines are useless today. Ticket is $80-$90."</li>
+                <li><b>Chicago/LA Passengers:</b> "We don't go there. Go back to the airlines."</li>
+            </ul>
+        </div>
+        <button class="btn-back" onclick="showPage('menu-page')">Back to Menu</button>
+    </div>
+
+    <div id="taxi-page" class="hidden">
+        <div class="role-card" style="border-top: 10px solid var(--taxi-yellow);">
+            <h2>🚖 Taxi Dispatcher</h2>
+            <div class="inventory">
+                <p>✅ <b>Destinations:</b> Brooklyn ($50), Queens ($40), New Jersey ($120).</p>
+            </div>
+            <h3>Instructions:</h3>
+            <ul>
+                <li><b>Refusal:</b> "I am not driving you to Washington DC! Take the train!"</li>
+                <li><b>Mission:</b> Find people with "New Jersey" or "Brooklyn" tickets. They are lost.</li>
+            </ul>
+        </div>
+        <button class="btn-back" onclick="showPage('menu-page')">Back to Menu</button>
+    </div>
+
+    <div id="traveler-page" class="hidden">
+        <h2>Passenger Portal</h2>
+        <p>Click to retrieve your booked ticket.</p>
+        <button onclick="generateTicket()" style="padding:15px 30px; font-size:1.2rem; background:white; color:black; border-radius:8px; cursor:pointer;">🎫 Retrieve Ticket</button>
+
+        <div id="ticket-display" class="hidden">
+            <div id="ticket-card" class="ticket">
+                <div id="t-header" class="ticket-header">
+                    <span id="t-airline">EAGLE WINGS</span>
+                    <span>BOARDING PASS</span>
+                </div>
+                <div class="ticket-body">
+                    <div class="ticket-row">
+                        <div>
+                            <div class="ticket-label">Passenger</div>
+                            <div id="t-role" class="ticket-value">John Doe</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="ticket-label">Flight</div>
+                            <div id="t-flight" class="ticket-value">EA-101</div>
+                        </div>
+                    </div>
+                    
+                    <div class="ticket-label">Destination</div>
+                    <div id="t-dest" class="ticket-dest">LOS ANGELES</div>
+
+                    <div class="ticket-row" style="margin-top:15px;">
+                        <div>
+                            <div class="ticket-label">Date</div>
+                            <div class="ticket-value">TODAY</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="ticket-label">Seat</div>
+                            <div class="ticket-value">12A</div>
+                        </div>
+                    </div>
+                    <div class="barcode"></div>
+                </div>
+            </div>
+
+            <div style="background:#333; padding:15px; border-radius:10px; margin-top:20px; text-align:left;">
+                <p><b>💰 Your Wallet:</b> <span id="t-money" style="color:#4caf50; font-weight:bold;"></span></p>
+                <p><b>⚠️ Action Required:</b> Check the <b>Main Board</b> carefully! Wait for the page to flip. Is your flight cancelled?</p>
+            </div>
+        </div>
+        <button class="btn-back" onclick="showPage('menu-page')">Back to Menu</button>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('div[id$="-page"]').forEach(div => {
+                div.classList.remove('active');
+                div.classList.add('hidden');
+            });
+            const target = document.getElementById(pageId);
+            target.classList.remove('hidden');
+            target.classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        // --- BOARD LOGIC ---
+        // Page 1: Long Distance (Switchable Options)
+        const boardPage1 = [
+            { id: "EA-101", dest: "LOS ANGELES", status: "CANCELLED", class: "st-cancel", airline: "🦅 EA" },
+            { id: "LJ-500", dest: "LOS ANGELES", status: "ON TIME", class: "st-open", airline: "🗽 LJ" },
+            { id: "EA-303", dest: "CHICAGO", status: "BOARDING", class: "st-open", airline: "🦅 EA" },
+            { id: "LJ-700", dest: "CHICAGO", status: "CANCELLED", class: "st-cancel", airline: "🗽 LJ" },
+            { id: "EA-550", dest: "MIAMI", status: "ON TIME", class: "st-open", airline: "🦅 EA" },
+            { id: "LJ-990", dest: "MIAMI", status: "CANCELLED", class: "st-cancel", airline: "🗽 LJ" }
+        ];
+
+        // Page 2: Short Distance (Forced Train/Taxi)
+        const boardPage2 = [
+            { id: "EA-202", dest: "WASH. DC", status: "CANCELLED", class: "st-cancel", airline: "🦅 EA" },
+            { id: "LJ-600", dest: "WASH. DC", status: "CANCELLED", class: "st-cancel", airline: "🗽 LJ" },
+            { id: "EA-404", dest: "BOSTON", status: "CANCELLED", class: "st-cancel", airline: "🦅 EA" },
+            { id: "LJ-800", dest: "BOSTON", status: "CANCELLED", class: "st-cancel", airline: "🗽 LJ" },
+            { id: "EA-999", dest: "NEW JERSEY", status: "CHECK TAXI", class: "st-taxi", airline: "🦅 EA" },
+            { id: "LJ-111", dest: "BROOKLYN", status: "CHECK TAXI", class: "st-taxi", airline: "🗽 LJ" }
+        ];
+
+        let cycleInterval;
+        let currentPage = 1;
+
+        function renderBoard(data, pageNum) {
+            const container = document.getElementById('flight-display');
+            container.innerHTML = ''; // Clear current
+            
+            data.forEach(flight => {
+                const row = document.createElement('div');
+                row.className = 'flight-row';
+                row.innerHTML = `<span>${flight.airline} ${flight.id}</span><span class="col-dest">${flight.dest}</span><span class="${flight.class}">${flight.status}</span>`;
+                container.appendChild(row);
+            });
+
+            document.getElementById('page-num').innerText = pageNum;
+        }
+
+        function startBoardCycle() {
+            // Render Page 1 immediately
+            currentPage = 1;
+            renderBoard(boardPage1, 1);
+
+            // Start Cycle
+            if(cycleInterval) clearInterval(cycleInterval);
+            cycleInterval = setInterval(() => {
+                if (currentPage === 1) {
+                    renderBoard(boardPage2, 2);
+                    currentPage = 2;
+                } else {
+                    renderBoard(boardPage1, 1);
+                    currentPage = 1;
+                }
+            }, 8000); // 8 seconds per page (Slower read time)
+        }
+
+        function stopBoardCycle() {
+            if(cycleInterval) clearInterval(cycleInterval);
+        }
+
+        // --- TICKET GENERATOR ---
+        
+        const roles = ["Student", "Business Exec", "Tourist", "Grandma", "Musician", "Celebrity", "Spy"];
+        
+        // WALLET LOGIC: Assigned based on NEED
+        const highBudgets = ["Black Amex (Unlimited)", "Company Credit Card", "$1000 Travel Voucher"];
+        const mediumBudgets = ["$200 Cash", "$150 + MetroCard", "$300 Debit Card"];
+        const lowBudgets = ["$80 Crumpled Bills", "$100 Cash", "$60 + Gift Card"];
+
+        const scenarios = [
+            // HIGH COST SCENARIOS (Needs Flight Switch > $500)
+            { airline: "EAGLE WINGS", flight: "EA-101", dest: "LOS ANGELES", theme: "eagle", tier: "high" },
+            { airline: "LIBERTY JETS", flight: "LJ-700", dest: "CHICAGO", theme: "liberty", tier: "high" },
+            { airline: "LIBERTY JETS", flight: "LJ-990", dest: "MIAMI", theme: "liberty", tier: "high" },
+
+            // MEDIUM COST SCENARIOS (Needs Train/NJ Taxi > $100)
+            { airline: "EAGLE WINGS", flight: "EA-202", dest: "WASH. DC", theme: "eagle", tier: "medium" },
+            { airline: "LIBERTY JETS", flight: "LJ-800", dest: "BOSTON", theme: "liberty", tier: "medium" },
+            { airline: "EAGLE WINGS", flight: "EA-999", dest: "NEW JERSEY", theme: "eagle", tier: "medium" },
+
+            // LOW COST SCENARIOS (Needs Local Taxi > $50)
+            { airline: "LIBERTY JETS", flight: "LJ-111", dest: "BROOKLYN", theme: "liberty", tier: "low" }
+        ];
+
+        function generateTicket() {
+            const role = roles[Math.floor(Math.random() * roles.length)];
+            const scen = scenarios[Math.floor(Math.random() * scenarios.length)];
+            
+            // Assign Wallet based on Tier
+            let wallet = "";
+            if (scen.tier === "high") {
+                wallet = highBudgets[Math.floor(Math.random() * highBudgets.length)];
+            } else if (scen.tier === "medium") {
+                wallet = mediumBudgets[Math.floor(Math.random() * mediumBudgets.length)];
+            } else {
+                wallet = lowBudgets[Math.floor(Math.random() * lowBudgets.length)];
+            }
+
+            // Fill Ticket
+            document.getElementById('t-airline').innerText = scen.airline;
+            document.getElementById('t-flight').innerText = scen.flight;
+            document.getElementById('t-dest').innerText = scen.dest;
+            document.getElementById('t-role').innerText = role;
+            
+            // Style Ticket based on airline
+            const header = document.getElementById('t-header');
+            if (scen.theme === 'liberty') {
+                header.classList.add('liberty');
+                header.style.background = '#111';
+                header.style.color = '#d4af37';
+            } else {
+                header.classList.remove('liberty');
+                header.style.background = '#003366';
+                header.style.color = 'white';
+            }
+
+            // Fill Info
+            document.getElementById('t-money').innerText = wallet;
+
+            document.getElementById('ticket-display').classList.remove('hidden');
+            document.getElementById('ticket-display').classList.add('active');
+        }
+    </script>
+</body>
+</html>
